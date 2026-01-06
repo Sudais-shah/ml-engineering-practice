@@ -4,7 +4,7 @@ This repository contains my daily hands-on practice in machine learning,
 deep learning, and data engineering using Python.
 
 ## Purpose
-- Rebuild daily coding consistency
+- Practice new ideas
 - Strengthen practical ML/DL implementation skills
 - Practice interview-relevant engineering concepts
 
@@ -17,7 +17,7 @@ deep learning, and data engineering using Python.
 - Python
 - NumPy, Pandas
 - PyTorch
-- SQL (where applicable)
+- others
 
 ## Update Frequency
 This repository is updated daily or near-daily with practical coding exercises.
