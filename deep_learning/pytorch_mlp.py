@@ -3,28 +3,36 @@ import torch.nn as nn
 
 
 class MultiLayerNN(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim):
+    def __init__(self, input_dim, output_dim):
         super().__init__()  
 
         self.input_dim = input_dim
-        self.hidden_dim = hidden_dim
         self.output_dim = output_dim
-
-        self.fc1 = nn.Linear(self.input_dim, self.hidden_dim)
-        self.act = nn.ReLU()
-        self.fc2 = nn.Linear(self.hidden_dim, self.output_dim)
+        
+        self.fc1 = nn.Linear(self.input_dim, 256)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(256, 128)
+        self.relu2 = nn.ReLU()
+        self.fc3 = nn.Linear(128, 64)
+        self.relu3 = nn.ReLU()
+        self.fc4 = nn.Linear(64, self.output_dim)
 
     def forward(self, x):
+        print("Input shape:", x.shape)
+
         x = self.fc1(x)
-        x = self.act(x)
+        x = self.relu1(x)
         x = self.fc2(x)
+        x = self.relu2(x)
+        x = self.fc3(x)
+        x = self.relu3(x)
+        x = self.fc4(x)
+
         return x
 
-
 if __name__ == "__main__":
-    mlp = MultiLayerNN(784, 64, 10)
-    print(mlp)
-
-    x = torch.randn(1, 784)
-    y = mlp(x)
-    print(y.shape)
+    model = MultiLayerNN(input_dim=784, output_dim=10)
+    print(model)
+    x = torch.randn(32, 784)
+    y = model(x)
+    print("Output shape:", y.shape)
