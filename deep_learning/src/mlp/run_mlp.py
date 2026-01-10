@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_classification 
-from deep_learning.multi_layer_NN import MLNN
+from deep_learning.mlp.multi_layer_NN import MLNN
 
 
 def main():
