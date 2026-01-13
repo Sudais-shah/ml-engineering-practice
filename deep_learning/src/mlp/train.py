@@ -1,56 +1,78 @@
 import torch
 import torch.nn as nn
-import MLP
-# -------------------------------
-# FAKE DATA (SIMULATING REAL DATA)
-# -------------------------------
-batch_size = 32
-input_dim = 784      # number of features per sample
-hidden_dim = 64      # number of neurons in hidden layer
-output_dim = 10      # number of classes
+import torch.optim as optim
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+from models import MLP
 
-# Input data (32 samples, each with 784 features)
-x = torch.randn(batch_size, input_dim)
+def main():
+    batch_size = 64
+    learning_rate = 0.1
+    epochs = 10
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Target labels (correct answers for each sample)
-y = torch.randint(0, output_dim, (batch_size,))
+    transform = transforms.Compose([transforms.ToTensor(),transforms.Lambda(lambda x: x.view(-1))])
 
+    train_dataset = datasets.MNIST(root="./data", train=True, download=True, transform=transform)
+    test_dataset = datasets.MNIST(root="./data", train=False, download=True, transform=transform)
 
-# -------------------------------
-# INITIALIZE MODEL
-# -------------------------------
-model = MLP(input_dim, hidden_dim, output_dim)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-print(model)
+    model = MLP(input_dim=784, output_dim=10).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
+    for epoch in range(epochs):
+        # ---------- TRAIN ----------
+        model.train()
+        train_loss = 0
+        correct = 0
+        total = 0
 
-# -------------------------------
-# LOSS FUNCTION & OPTIMIZER
-# -------------------------------
-loss_fn = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.1)
+        for x, y in train_loader:
+            x, y = x.to(device), y.to(device)
 
+            outputs = model(x)
+            loss = criterion(outputs, y)
 
-# -------------------------------
-# TRAINING LOOP
-# -------------------------------
-epochs = 5
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-for epoch in range(epochs):
+            train_loss += loss.item() * x.size(0)
+            preds = torch.argmax(outputs, dim=1)
+            correct += (preds == y).sum().item()
+            total += y.size(0)
 
-    # 1. Forward pass (model makes predictions)
-    outputs = model(x)
+        train_loss /= total
+        train_acc = correct / total
 
-    # 2. Calculate loss (how wrong the model is)
-    loss = loss_fn(outputs, y)
+        # ---------- EVAL ----------
+        model.eval()
+        eval_loss = 0
+        correct = 0
+        total = 0
 
-    # 3. Clear previous gradients
-    optimizer.zero_grad()
+        with torch.no_grad():
+            for x, y in test_loader:
+                x, y = x.to(device), y.to(device)
 
-    # 4. Backward pass (compute gradients)
-    loss.backward()
+                outputs = model(x)
+                loss = criterion(outputs, y)
 
-    # 5. Update weights
-    optimizer.step()
+                eval_loss += loss.item() * x.size(0)
+                preds = torch.argmax(outputs, dim=1)
+                correct += (preds == y).sum().item()
+                total += y.size(0)
 
-    print(f"Epoch [{epoch+1}/{epochs}] - Loss: {loss.item():.4f}")
+        eval_loss /= total
+        eval_acc = correct / total
+
+        print(f"Epoch [{epoch+1}/{epochs}] " 
+              f"Train Loss: {train_loss:.4f} Train Acc: {train_acc:.4f} "
+            f"Eval Loss: {eval_loss:.4f} Eval Acc: {eval_acc:.4f}")
+
+if __name__ == "__main__":
+     main()
+

@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class MLP(nn.Module):
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, input_dim= 784, output_dim = 10):
         super().__init__()  
 
         self.input_dim = input_dim
@@ -18,8 +18,6 @@ class MLP(nn.Module):
         self.fc4 = nn.Linear(64, self.output_dim)
 
     def forward(self, x):
-        print("Input shape:", x.shape)
-
         x = self.fc1(x)
         x = self.relu1(x)
         x = self.fc2(x)
@@ -29,10 +27,3 @@ class MLP(nn.Module):
         x = self.fc4(x)
 
         return x
-
-if __name__ == "__main__":
-    model = MultiLayerNN(input_dim=784, output_dim=10)
-    print(model)
-    x = torch.randn(32, 784)
-    y = model(x)
-    print("Output shape:", y.shape)
